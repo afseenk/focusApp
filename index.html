@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyFlow</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <aside class="sidebar">
+
+      <h1 class="logo">StudyFlow</h1>
+
+      <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+      <button class="nav-btn" data-page="goals">Goals</button>
+      <button class="nav-btn" data-page="timer">Timer</button>
+      <button class="nav-btn" data-page="calendar">Calendar</button>
+      <button class="nav-btn" data-page="progress">Progress</button>
+      <button class="nav-btn" data-page="themes">Themes</button>
+
+    </aside>
+
+    <main class="content">
+
+      <!-- DASHBOARD -->
+
+      <section id="dashboard" class="page active-page">
+
+        <p class="label">TODAY'S FLOW</p>
+
+        <div class="card welcome-card">
+          <h2>Welcome!!👋</h2>
+          <p>Lock in, finish your goals, and stay on schedule.</p>
+        </div>
+
+        <div class="card">
+          <div class="dashboard-top">
+            <div>
+              <p class="small-label">GOAL PROGRESS</p>
+              <h2 id="goalProgress">0%</h2>
+            </div>
+
+            <p id="goalProgressText">No goals yet.</p>
+          </div>
+
+          <div class="progress-bar">
+            <div id="progressFill"></div>
+          </div>
+        </div>
+
+        <p class="label">TODAY'S GOALS</p>
+
+        <div id="dashboardGoals"></div>
+
+      </section>
+
+      <!-- GOALS -->
+
+      <section id="goals" class="page">
+
+        <p class="label">GOAL MANAGER</p>
+
+        <div class="card">
+
+          <input
+            id="goalInput"
+            placeholder="Enter a study goal..."
+          >
+
+          <button id="addGoalBtn">
+            Add Goal
+          </button>
+
+        </div>
+
+        <ul id="goalList"></ul>
+
+      </section>
+
+      <!-- TIMER -->
+
+      <section id="timer" class="page">
+
+        <p class="label">CUSTOM TIMER</p>
+
+        <div class="card timer-card">
+
+          <label>Focus Minutes</label>
+
+          <input
+            id="focusMinutes"
+            type="number"
+            value="25"
+            min="1"
+          >
+
+          <label>Break Minutes</label>
+
+          <input
+            id="breakMinutes"
+            type="number"
+            value="5"
+            min="1"
+          >
+
+          <div class="timer-status-box">
+            <p id="timerStatus">Work Time</p>
+            <span id="timerSubtext">Focus session</span>
+          </div>
+
+          <div id="timerDisplay">
+            25:00
+          </div>
+
+          <div class="button-group">
+
+            <button id="startBtn">Start</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- CALENDAR -->
+
+      <section id="calendar" class="page">
+
+        <p class="label">STUDY CALENDAR</p>
+
+        <div class="calendar-layout">
+
+          <div class="card calendar-card">
+
+            <div class="calendar-header">
+
+              <button id="prevMonthBtn" class="calendar-nav-btn">
+                ←
+              </button>
+
+              <h2 id="calendarMonthTitle">Month Year</h2>
+
+              <button id="nextMonthBtn" class="calendar-nav-btn">
+                →
+              </button>
+
+            </div>
+
+            <div class="calendar-weekdays">
+              <span>Sun</span>
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid"></div>
+
+          </div>
+
+          <div class="card event-card">
+
+            <p class="small-label">ADD TASK / EVENT</p>
+
+            <input
+              id="eventTitleInput"
+              placeholder="Example: Finish math homework"
+            >
+
+            <input
+              id="eventDateInput"
+              type="date"
+            >
+
+            <button id="addEventBtn">
+              Add to Calendar
+            </button>
+
+            <div class="selected-day-box">
+
+              <p class="small-label">SELECTED DAY</p>
+
+              <h3 id="selectedDateTitle">
+                Today
+              </h3>
+
+              <div id="selectedDayEvents"></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <p class="small-label">UPCOMING TASKS / EVENTS</p>
+
+          <div id="upcomingEvents"></div>
+
+        </div>
+
+      </section>
+
+      <!-- PROGRESS -->
+
+      <section id="progress" class="page">
+
+        <p class="label">STATISTICS</p>
+
+        <div class="card stats-card">
+
+          <div class="stat">
+            <h3 id="sessionsCompleted">0</h3>
+            <p>Sessions Completed</p>
+          </div>
+
+          <div class="stat">
+            <h3 id="totalMinutes">0</h3>
+            <p>Total Focus Minutes</p>
+          </div>
+
+        </div>
+
+        <button id="resetStatsBtn">
+          Reset Stats
+        </button>
+
+      </section>
+
+      <!-- THEMES -->
+
+      <section id="themes" class="page">
+
+        <p class="label">CHOOSE A THEME</p>
+
+        <div class="card theme-card">
+
+          <p class="theme-page-text">
+            Pick a color theme, then switch between light mode and dark mode.
+          </p>
+
+          <div class="theme-options">
+
+            <button class="theme-btn active-theme" data-theme="black" title="Black"></button>
+            <button class="theme-btn" data-theme="red" title="Red"></button>
+            <button class="theme-btn" data-theme="green" title="Green"></button>
+            <button class="theme-btn" data-theme="blue" title="Blue"></button>
+            <button class="theme-btn" data-theme="purple" title="Purple"></button>
+
+          </div>
+
+          <div class="mode-row">
+
+            <div>
+              <p class="small-label">MODE</p>
+              <h3 id="modeText">Light Mode</h3>
+            </div>
+
+            <button id="modeToggleBtn">
+              Switch to Dark
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
