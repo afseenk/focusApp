@@ -554,7 +554,7 @@ function updateTimerStatus() {
   if (timerMode === "focus") {
 
     timerStatus.textContent =
-      "LOCK IN TIME";
+      "Work Time";
 
     timerSubtext.textContent =
       "Focus session";
