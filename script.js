@@ -276,8 +276,94 @@ const goalProgressText =
 const progressFill =
   document.getElementById("progressFill");
 
+const notesContent =
+  document.getElementById("notesContent");
+
+const flashcardFront = document.getElementById("flashcardFront");
+const flashcardBack = document.getElementById("flashcardBack");
+const addFlashcardBtn = document.getElementById("addFlashcardBtn");
+const flashcardList = document.getElementById("flashcardList");
+const practiceFlashcardsBtn = document.getElementById("practiceFlashcardsBtn");
+const closePracticeBtn = document.getElementById("closePracticeBtn");
+const practicePanel = document.getElementById("practicePanel");
+
 let goals =
   JSON.parse(localStorage.getItem("studyGoals")) || [];
+
+let flashcards =
+  JSON.parse(localStorage.getItem("flashcards")) || [];
+
+let practiceIndex = 0;
+let practiceShowingAnswer = false;
+
+// ----------------------
+// UNDO/REDO HISTORY
+// ----------------------
+
+let undoStack = [];
+let redoStack = [];
+const MAX_HISTORY = 50;
+
+const notificationBar = document.getElementById("notificationBar");
+const notificationText = document.getElementById("notificationText");
+const recoverBtn = document.getElementById("recoverBtn");
+
+let notificationTimeout;
+
+function showNotification(goalText) {
+  notificationText.textContent = `"${goalText}" deleted`;
+  notificationBar.classList.add("show");
+  
+  clearTimeout(notificationTimeout);
+  notificationTimeout = setTimeout(() => {
+    hideNotification();
+  }, 5000);
+}
+
+function hideNotification() {
+  notificationBar.classList.remove("show");
+}
+
+function saveToHistory() {
+  undoStack.push(JSON.parse(JSON.stringify(goals)));
+  if (undoStack.length > MAX_HISTORY) {
+    undoStack.shift();
+  }
+  redoStack = [];
+}
+
+function undo() {
+  if (undoStack.length === 0) return;
+  
+  redoStack.push(JSON.parse(JSON.stringify(goals)));
+  goals = undoStack.pop();
+  saveGoals();
+  renderGoals();
+  hideNotification();
+}
+
+function redo() {
+  if (redoStack.length === 0) return;
+  
+  undoStack.push(JSON.parse(JSON.stringify(goals)));
+  goals = redoStack.pop();
+  saveGoals();
+  renderGoals();
+}
+
+if (recoverBtn) {
+  recoverBtn.addEventListener("click", undo);
+}
+
+document.addEventListener("keydown", event => {
+  if (event.ctrlKey && event.key === "z" && !event.shiftKey) {
+    event.preventDefault();
+    undo();
+  } else if ((event.ctrlKey && event.shiftKey && event.key === "Z") || (event.ctrlKey && event.key === "y")) {
+    event.preventDefault();
+    redo();
+  }
+});
 
 goals = goals.map(goal => {
 
@@ -377,6 +463,7 @@ function renderGoals() {
 
     checkbox.addEventListener("change", () => {
 
+      saveToHistory();
       goals[index].completed =
         checkbox.checked;
 
@@ -412,10 +499,13 @@ function renderGoals() {
 
     deleteButton.addEventListener("click", () => {
 
+      saveToHistory();
+      const deletedGoal = goals[index].text;
       goals.splice(index, 1);
 
       saveGoals();
       renderGoals();
+      showNotification(deletedGoal);
 
     });
 
@@ -464,6 +554,7 @@ function addGoal() {
 
   if (goal === "") return;
 
+  saveToHistory();
   goals.push({
     text: goal,
     completed: false
@@ -487,7 +578,205 @@ goalInput.addEventListener("keydown", event => {
 
 });
 
+function saveNotes() {
+  localStorage.setItem(
+    "studyNotes",
+    notesContent.value
+  );
+}
+
+function loadNotes() {
+  const savedNotes =
+    localStorage.getItem("studyNotes") || "";
+
+  if (notesContent) {
+    notesContent.value = savedNotes;
+  }
+}
+
+function saveFlashcards() {
+  localStorage.setItem("flashcards", JSON.stringify(flashcards));
+}
+
+function renderFlashcards() {
+  if (!flashcardList) return;
+
+  flashcardList.innerHTML = "";
+
+  if (flashcards.length === 0) {
+    flashcardList.innerHTML = "<p class='empty-message'>No flashcards yet. Add one to get started.</p>";
+    return;
+  }
+
+  flashcards.forEach((card, index) => {
+    const item = document.createElement("div");
+    item.className = "goal-item";
+
+    const info = document.createElement("div");
+    info.innerHTML = `<strong>${card.front}</strong><br><span class="goal-text">${card.back}</span>`;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Delete";
+
+    deleteBtn.addEventListener("click", () => {
+      flashcards.splice(index, 1);
+      saveFlashcards();
+      renderFlashcards();
+    });
+
+    item.appendChild(info);
+    item.appendChild(deleteBtn);
+    flashcardList.appendChild(item);
+  });
+}
+
+function addFlashcard() {
+  const front = flashcardFront.value.trim();
+  const back = flashcardBack.value.trim();
+
+  if (!front || !back) return;
+
+  flashcards.push({ front, back });
+  flashcardFront.value = "";
+  flashcardBack.value = "";
+  saveFlashcards();
+  renderFlashcards();
+}
+
+function startPractice() {
+  if (flashcards.length === 0) {
+    practicePanel.innerHTML = "<p class='empty-message'>Add a flashcard first.</p>";
+    practicePanel.classList.add("active");
+    return;
+  }
+
+  practiceIndex = 0;
+  practiceShowingAnswer = false;
+  practicePanel.classList.add("active");
+  renderPracticeCard();
+}
+
+function closePractice() {
+  practicePanel.classList.remove("active");
+  practicePanel.innerHTML = "";
+}
+
+function renderPracticeCard() {
+  if (!flashcards.length) {
+    practicePanel.innerHTML = "<p class='empty-message'>No flashcards to practice.</p>";
+    return;
+  }
+
+  const card = flashcards[practiceIndex];
+  practicePanel.innerHTML = "";
+
+  const practiceBox = document.createElement("div");
+  practiceBox.className = "practice-card";
+
+  const counter = document.createElement("p");
+  counter.className = "practice-counter";
+  counter.textContent = `${practiceIndex + 1} / ${flashcards.length}`;
+
+  const title = document.createElement("h2");
+  title.textContent = practiceShowingAnswer ? "Answer" : "Question";
+
+  const content = document.createElement("p");
+  content.textContent = practiceShowingAnswer ? card.back : card.front;
+
+  const actions = document.createElement("div");
+  actions.className = "practice-actions";
+
+  const revealBtn = document.createElement("button");
+  revealBtn.id = "revealCardBtn";
+  revealBtn.className = "action-btn";
+  revealBtn.textContent = practiceShowingAnswer ? "Hide Answer" : "Reveal Answer";
+  revealBtn.addEventListener("click", event => {
+    event.stopPropagation();
+    practiceShowingAnswer = !practiceShowingAnswer;
+    renderPracticeCard();
+  });
+
+  const prevBtn = document.createElement("button");
+  prevBtn.id = "prevCardBtn";
+  prevBtn.className = "action-btn";
+  prevBtn.textContent = "Previous";
+  prevBtn.addEventListener("click", event => {
+    event.stopPropagation();
+    practiceIndex = (practiceIndex - 1 + flashcards.length) % flashcards.length;
+    practiceShowingAnswer = false;
+    renderPracticeCard();
+  });
+
+  const nextBtn = document.createElement("button");
+  nextBtn.id = "nextCardBtn";
+  nextBtn.className = "action-btn";
+  nextBtn.textContent = "Next";
+  nextBtn.addEventListener("click", event => {
+    event.stopPropagation();
+    practiceIndex = (practiceIndex + 1) % flashcards.length;
+    practiceShowingAnswer = false;
+    renderPracticeCard();
+  });
+
+  const closeBtn = document.createElement("button");
+  closeBtn.id = "closePracticeBtn";
+  closeBtn.className = "action-btn";
+  closeBtn.textContent = "Close";
+  closeBtn.addEventListener("click", event => {
+    event.stopPropagation();
+    closePractice();
+  });
+
+  actions.appendChild(prevBtn);
+  actions.appendChild(revealBtn);
+  actions.appendChild(nextBtn);
+  actions.appendChild(closeBtn);
+
+  practiceBox.appendChild(counter);
+  practiceBox.appendChild(title);
+  practiceBox.appendChild(content);
+  practiceBox.appendChild(actions);
+
+  practiceBox.addEventListener("click", () => {
+    practiceShowingAnswer = !practiceShowingAnswer;
+    renderPracticeCard();
+  });
+
+  practicePanel.appendChild(practiceBox);
+}
+
+if (notesContent) {
+  notesContent.addEventListener("input", saveNotes);
+}
+
+if (addFlashcardBtn) {
+  addFlashcardBtn.addEventListener("click", addFlashcard);
+}
+
+if (practiceFlashcardsBtn) {
+  practiceFlashcardsBtn.addEventListener("click", startPractice);
+}
+
+if (closePracticeBtn) {
+  closePracticeBtn.addEventListener("click", () => {
+    closePractice();
+  });
+}
+
+if (flashcardFront && flashcardBack) {
+  [flashcardFront, flashcardBack].forEach(input => {
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        addFlashcard();
+      }
+    });
+  });
+}
+
 renderGoals();
+loadNotes();
+renderFlashcards();
 
 // ----------------------
 // TIMER
@@ -557,12 +846,12 @@ function updateTimerStatus() {
       "Work Time";
 
     timerSubtext.textContent =
-      "Focus session";
+      "Focus session, you can do this!!";
 
   } else {
 
     timerStatus.textContent =
-      "BREAK TIME";
+      "Break Time!";
 
     timerSubtext.textContent =
       "Rest, reset, then come back stronger";
@@ -683,6 +972,23 @@ pauseBtn.addEventListener("click", pauseTimer);
 
 resetBtn.addEventListener("click", resetTimerToFocus);
 
+switchModeBtn.addEventListener("click", () => {
+
+  if (isRunning) return;
+
+  if (timerMode === "focus") {
+    timerMode = "break";
+  } else {
+    timerMode = "focus";
+  }
+
+  timeLeft = timerMode === "focus" ? getFocusSeconds() : getBreakSeconds();
+
+  updateTimerStatus();
+  updateTimerDisplay();
+
+});
+
 focusInput.addEventListener("change", () => {
 
   if (timerMode === "focus" && !isRunning) {
@@ -733,6 +1039,9 @@ const eventTitleInput =
 
 const eventDateInput =
   document.getElementById("eventDateInput");
+
+const eventRecurrenceInput =
+  document.getElementById("eventRecurrenceInput");
 
 const addEventBtn =
   document.getElementById("addEventBtn");
@@ -879,7 +1188,7 @@ function renderCalendar() {
     dayButton.appendChild(dayNumber);
 
     const dayEvents =
-      events.filter(event => event.date === dateString);
+      events.filter(event => eventOccursOn(event, dateString));
 
     if (dayEvents.length > 0) {
 
@@ -924,7 +1233,7 @@ function renderSelectedDayEvents() {
     "";
 
   const dayEvents =
-    events.filter(event => event.date === selectedDate);
+    events.filter(event => eventOccursOn(event, selectedDate));
 
   if (dayEvents.length === 0) {
 
@@ -963,8 +1272,7 @@ function renderUpcomingEvents() {
     formatDate(new Date());
 
   const upcoming =
-    events
-      .filter(event => event.date >= today)
+    getOccurrencesForRange(today, formatDate(addDays(new Date(), 30)))
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 6);
 
@@ -1019,11 +1327,27 @@ function createEventItem(event) {
   const date =
     document.createElement("p");
 
+  const dateForDisplay =
+    event.displayDate || event.date;
+
   date.textContent =
-    readableDate(event.date);
+    readableDate(dateForDisplay);
 
   eventInfo.appendChild(title);
   eventInfo.appendChild(date);
+
+  if (event.recurrence && event.recurrence !== "none") {
+    const recurrenceLabel =
+      document.createElement("p");
+
+    recurrenceLabel.className =
+      "recurrence-label";
+
+    recurrenceLabel.textContent =
+      `Repeats ${event.recurrence}`;
+
+    eventInfo.appendChild(recurrenceLabel);
+  }
 
   const deleteButton =
     document.createElement("button");
@@ -1053,6 +1377,63 @@ function createEventItem(event) {
 
 }
 
+function eventOccursOn(event, dateString) {
+  if (event.date === dateString) return true;
+
+  if (!event.recurrence || event.recurrence === "none") {
+    return false;
+  }
+
+  const eventDate = dateFromString(event.date);
+  const checkDate = dateFromString(dateString);
+
+  if (checkDate < eventDate) {
+    return false;
+  }
+
+  if (event.recurrence === "daily") {
+    return true;
+  }
+
+  if (event.recurrence === "weekly") {
+    return eventDate.getDay() === checkDate.getDay();
+  }
+
+  if (event.recurrence === "monthly") {
+    return eventDate.getDate() === checkDate.getDate();
+  }
+
+  return false;
+}
+
+function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function getOccurrencesForRange(startDateString, endDateString) {
+  const occurrences = [];
+  const start = dateFromString(startDateString);
+  const end = dateFromString(endDateString);
+
+  for (let day = new Date(start); day <= end; day.setDate(day.getDate() + 1)) {
+    const dateString = formatDate(day);
+
+    events.forEach(event => {
+      if (eventOccursOn(event, dateString)) {
+        occurrences.push({
+          ...event,
+          date: dateString,
+          displayDate: dateString
+        });
+      }
+    });
+  }
+
+  return occurrences;
+}
+
 function addCalendarEvent() {
 
   const title =
@@ -1066,7 +1447,8 @@ function addCalendarEvent() {
   events.push({
     id: String(Date.now()),
     title: title,
-    date: date
+    date: date,
+    recurrence: eventRecurrenceInput ? eventRecurrenceInput.value : "none"
   });
 
   selectedDate =
@@ -1176,3 +1558,341 @@ resetStatsBtn.addEventListener("click", () => {
 });
 
 updateStats();
+
+// ----------------------
+// MINIGAMES
+// ----------------------
+
+// Tic Tac Toe
+const tictacGrid = document.getElementById("tictacGrid");
+const tictacResetBtn = document.getElementById("tictacResetBtn");
+const tictacStatus = document.getElementById("tictacStatus");
+const tictacDifficulty = document.getElementById("tictacDifficulty");
+let tictacBoard = ["", "", "", "", "", "", "", "", ""];
+let tictacGameActive = true;
+let tictacMode = tictacDifficulty ? tictacDifficulty.value : "hard";
+
+function initTicTacToe() {
+  tictacBoard = ["", "", "", "", "", "", "", "", ""];
+  tictacGameActive = true;
+  tictacStatus.textContent = "Your turn (X)";
+  tictacGrid.innerHTML = "";
+
+  tictacBoard.forEach((cell, index) => {
+    const cellBtn = document.createElement("button");
+    cellBtn.className = "tictac-cell";
+    cellBtn.textContent = cell;
+    cellBtn.addEventListener("click", () => playTicTacToe(index));
+    tictacGrid.appendChild(cellBtn);
+  });
+}
+
+function checkTicTacWinner(board = tictacBoard) {
+  const wins = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+
+  for (let combo of wins) {
+    if (
+      board[combo[0]] &&
+      board[combo[0]] === board[combo[1]] &&
+      board[combo[0]] === board[combo[2]]
+    ) {
+      return board[combo[0]];
+    }
+  }
+  return null;
+}
+
+function getBestTicTacMove() {
+  const emptySpots = tictacBoard
+    .map((cell, i) => (cell === "" ? i : null))
+    .filter(v => v !== null);
+
+  // Winning/blocking shortcuts
+  for (let spot of emptySpots) {
+    tictacBoard[spot] = "O";
+    if (checkTicTacWinner(tictacBoard) === "O") {
+      tictacBoard[spot] = "";
+      return spot;
+    }
+    tictacBoard[spot] = "";
+  }
+
+  for (let spot of emptySpots) {
+    tictacBoard[spot] = "X";
+    if (checkTicTacWinner(tictacBoard) === "X") {
+      tictacBoard[spot] = "";
+      return spot;
+    }
+    tictacBoard[spot] = "";
+  }
+
+  if (tictacMode === "easy") {
+    return emptySpots[Math.floor(Math.random() * emptySpots.length)];
+  }
+
+  let bestScore = -Infinity;
+  let bestMove = emptySpots[0];
+
+  function minimax(board, isMaximizing) {
+    const winner = checkTicTacWinner(board);
+    if (winner === "O") return 1;
+    if (winner === "X") return -1;
+    if (board.every(cell => cell)) return 0;
+
+    if (isMaximizing) {
+      let score = -Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (!board[i]) {
+          board[i] = "O";
+          score = Math.max(score, minimax(board, false));
+          board[i] = "";
+        }
+      }
+      return score;
+    } else {
+      let score = Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (!board[i]) {
+          board[i] = "X";
+          score = Math.min(score, minimax(board, true));
+          board[i] = "";
+        }
+      }
+      return score;
+    }
+  }
+
+  for (let spot of emptySpots) {
+    tictacBoard[spot] = "O";
+    const score = minimax(tictacBoard, false);
+    tictacBoard[spot] = "";
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMove = spot;
+    }
+  }
+
+  return bestMove;
+}
+
+function playTicTacToe(index) {
+  if (!tictacGameActive || tictacBoard[index]) return;
+
+  tictacBoard[index] = "X";
+  updateTicTacDisplay();
+
+  let winner = checkTicTacWinner();
+  if (winner) {
+    tictacStatus.textContent = winner === "X" ? "🎉 You won!" : "😢 Computer won!";
+    tictacGameActive = false;
+    return;
+  }
+
+  if (tictacBoard.every(cell => cell)) {
+    tictacStatus.textContent = "🤝 Draw!";
+    tictacGameActive = false;
+    return;
+  }
+
+  // Computer turn
+  const computerMove = getBestTicTacMove();
+  tictacBoard[computerMove] = "O";
+  updateTicTacDisplay();
+
+  winner = checkTicTacWinner();
+  if (winner) {
+    tictacStatus.textContent = winner === "X" ? "🎉 You won!" : "😢 Computer won!";
+    tictacGameActive = false;
+  } else if (tictacBoard.every(cell => cell)) {
+    tictacStatus.textContent = "🤝 Draw!";
+    tictacGameActive = false;
+  }
+}
+
+function updateTicTacDisplay() {
+  const cells = document.querySelectorAll(".tictac-cell");
+  cells.forEach((cell, index) => {
+    cell.textContent = tictacBoard[index];
+  });
+}
+
+if (tictacDifficulty) {
+  tictacDifficulty.addEventListener("change", () => {
+    tictacMode = tictacDifficulty.value;
+    if (tictacGameActive) {
+      tictacStatus.textContent = `Your turn (X) - ${tictacMode === "hard" ? "Hard" : "Easy"}`;
+    }
+  });
+}
+
+tictacResetBtn.addEventListener("click", initTicTacToe);
+initTicTacToe();
+
+// Memory Match
+const memoryGrid = document.getElementById("memoryGrid");
+const memoryResetBtn = document.getElementById("memoryResetBtn");
+const memoryScore = document.getElementById("memoryScore");
+const memoryCards = ["🍎", "🍊", "🍋", "🍌", "🍓", "🍇", "🍒", "🥝"];
+let memoryDeck = [];
+let memoryFlipped = [];
+let memoryMatched = 0;
+
+function initMemoryMatch() {
+  memoryDeck = [...memoryCards, ...memoryCards].sort(() => Math.random() - 0.5);
+  memoryFlipped = [];
+  memoryMatched = 0;
+  memoryScore.textContent = "Score: 0/8";
+  memoryGrid.innerHTML = "";
+
+  memoryDeck.forEach((card, index) => {
+    const cardBtn = document.createElement("button");
+    cardBtn.className = "memory-card";
+    cardBtn.textContent = "?";
+    cardBtn.dataset.index = index;
+    cardBtn.dataset.card = card;
+
+    cardBtn.addEventListener("click", () => flipMemoryCard(cardBtn, index));
+    memoryGrid.appendChild(cardBtn);
+  });
+}
+
+function flipMemoryCard(cardBtn, index) {
+  if (memoryFlipped.length >= 2 || cardBtn.classList.contains("flipped")) return;
+
+  cardBtn.textContent = cardBtn.dataset.card;
+  cardBtn.classList.add("flipped");
+  memoryFlipped.push({ btn: cardBtn, card: cardBtn.dataset.card, index });
+
+  if (memoryFlipped.length === 2) {
+    setTimeout(() => {
+      if (memoryFlipped[0].card === memoryFlipped[1].card) {
+        memoryMatched++;
+        memoryFlipped.forEach(f => f.btn.classList.add("matched"));
+        memoryScore.textContent = `Score: ${memoryMatched}/8`;
+        if (memoryMatched === 8) memoryScore.textContent += " 🎉 Won!";
+      } else {
+        memoryFlipped.forEach(f => {
+          f.btn.textContent = "?";
+          f.btn.classList.remove("flipped");
+        });
+      }
+      memoryFlipped = [];
+    }, 800);
+  }
+}
+
+memoryResetBtn.addEventListener("click", initMemoryMatch);
+initMemoryMatch();
+
+// Wordle
+const wordleWords = ["ABOUT", "BELOW", "BUILD", "CHART", "CHOSE", "CLEAN", "CLEAR", "CLIMB", "CLOSE", "COULD", "COUNT", "COURT", "COVER", "CRASH", "CREAM", "CRIME", "DANCE", "DEALT", "DELAY", "DOUBT", "DRAFT", "DRAIN", "DREAM", "DRESS", "DRINK", "DRIVE", "EARLY", "EARTH", "EIGHT", "ENJOY", "ENTER", "EQUAL", "ERROR", "EVENT", "EVERY", "EXIST", "EXTRA", "FAITH", "FALSE", "FAULT", "FIELD", "FIFTH", "FIFTY", "FIGHT", "FINAL", "FIRST", "FIXED", "FLAME", "FLASH", "FLEET", "FLOOD", "FLOOR", "FOCUS", "FORCE", "FORTH", "FORTY", "FORUM", "FOUND", "FRAME", "FRAUD", "FRESH", "FRONT", "FRUIT", "FULLY", "FUNNY", "GIANT", "GIVEN", "GLASS", "GLOBE", "GLORY", "GRACE", "GRADE", "GRAIN", "GRAND", "GRANT", "GRASS", "GRAVE", "GREAT", "GREEN", "GROSS", "GROUP", "GROWN", "GUARD", "GUESS", "GUEST", "GUIDE", "GUILT", "HAPPY", "HARSH", "HEART", "HEAVY", "HENCE", "HENRY", "HORSE", "HOTEL", "HOUSE", "HUMAN", "IDEAL", "IMAGE", "INDEX", "INNER", "INPUT", "ISSUE", "JAPAN", "JUDGE", "JUICE", "KNOWN", "KNIFE", "LABEL", "LARGE", "LASER", "LATER", "LAUGH", "LAYER", "LEARN", "LEASE", "LEAST", "LEAVE", "LEFT", "LEGAL", "LEMON", "LEVEL", "LIGHT", "LIMIT", "LOCAL", "LOGIC", "LOOSE", "LOWER", "LUCKY", "LUNCH", "LYING", "MAGIC", "MAJOR", "MAKER", "MARCH", "MARRY", "MATCH", "MAYBE", "MAYOR", "MEANT", "MEDIA", "METAL", "MIGHT", "MINOR", "MINUS", "MIXED", "MODEL", "MONEY", "MONTH", "MORAL", "MOTOR", "MOUNT", "MOUSE", "MOUTH", "MOVED", "MOVIE", "MUSIC", "NEEDS", "NEVER", "NEWLY", "NIGHT", "NINTH", "NOBLE", "NOISE", "NORTH", "NOTED", "NOVEL", "NURSE", "OCCUR", "OCEAN", "OFFER", "OFTEN", "ORDER", "ORGAN", "OTHER", "OUGHT", "OUTER", "PANEL", "PAPER", "PARTY", "PEACE", "PEARL", "PHASE", "PHONE", "PHOTO", "PIANO", "PIECE", "PILOT", "PITCH", "PIZZA", "PLACE", "PLAIN", "PLANE", "PLANT", "PLATE", "PLAYS", "PLAZA", "POINT", "POUND", "POWER", "PRESS", "PRICE", "PRIDE", "PRIME", "PRINT", "PRIOR", "PRIZE", "PROOF", "PROUD", "PROVE", "PULLED", "PULSE", "PUPIL", "QUEEN", "QUERY", "QUEST", "QUICK", "QUIET", "QUITE", "QUOTA", "QUOTE", "RADIO", "RAISE", "RANGE", "RAPID", "REACH", "REACT", "REALM", "REBEL", "REFER", "RELAX", "REPLY", "RESET", "RIDER", "RIDGE", "RIGHT", "RIVAL", "RIVER", "ROBIN", "ROMAN", "ROUGH", "ROUND", "ROUTE", "ROYAL", "RUGBY", "RULED", "RURAL", "SCALE", "SCARE", "SCENE", "SCOPE", "SCORE", "SENSE", "SERVE", "SETUP", "SEVEN", "SHALL", "SHAPE", "SHARE", "SHARP", "SHEET", "SHELF", "SHELL", "SHIFT", "SHINE", "SHIRT", "SHOCK", "SHOOT", "SHORE", "SHORT", "SHOWN", "SIGHT", "SINCE", "SIXTH", "SIZED", "SKILL", "SLEEP", "SLICE", "SLIDE", "SMALL", "SMART", "SMELL", "SMILE", "SMITH", "SMOKE", "SNAKE", "SOLID", "SOLVE", "SORRY", "SOUND", "SOUTH", "SPACE", "SPARE", "SPARK", "SPEAK", "SPEED", "SPELL", "SPEND", "SPENT", "SPLIT", "SPOKE", "SPORT", "STAFF", "STAGE", "STAKE", "STAND", "START", "STATE", "STEAM", "STEEL", "STEEP", "STICK", "STILL", "STOCK", "STONE", "STOOD", "STORE", "STORM", "STORY", "STRIP", "STUCK", "STUDY", "STUFF", "STYLE", "SUGAR", "SUITE", "SUPER", "SWEET", "TABLE", "TAKEN", "TASTE", "TEACH", "THANK", "THEFT", "THEIR", "THEME", "THERE", "THESE", "THICK", "THING", "THINK", "THIRD", "THOSE", "THREE", "THREW", "THROW", "THUMB", "TIGHT", "TIMER", "TIRED", "TITLE", "TODAY", "TOPIC", "TOTAL", "TOUCH", "TOUGH", "TOWER", "TRACK", "TRADE", "TRAIN", "TREAT", "TREND", "TRIAL", "TRIBE", "TRICK", "TRIED", "TRUCK", "TRULY", "TRUMP", "TRUST", "TRUTH", "TRYING", "TWICE", "UNCLE", "UNDER", "UNDUE", "UNION", "UNITY", "UNTIL", "UPPER", "URBAN", "USUAL", "UTTER", "VALUE", "VIDEO", "VIRUS", "VISIT", "VITAL", "VOCAL", "VOICE", "WASTE", "WATCH", "WATER", "WEARY", "WHEAT", "WHEEL", "WHERE", "WHICH", "WHILE", "WHITE", "WHOLE", "WHOSE", "WIDEN", "WIDTH", "WOMAN", "WOMEN", "WORLD", "WORRY", "WORSE", "WORST", "WORTH", "WOULD", "WOUND", "WRITE", "WRONG", "WROTE", "YIELD", "YOUNG", "YOURS", "YOUTH"];
+const wordleBoard = document.getElementById("wordleBoard");
+const wordleInput = document.getElementById("wordleInput");
+const wordleSubmitBtn = document.getElementById("wordleSubmitBtn");
+const wordleStatus = document.getElementById("wordleStatus");
+let wordleGame = { word: "", attempts: 6, guesses: [], active: true };
+
+function initWordle() {
+  wordleGame.word = wordleWords[Math.floor(Math.random() * wordleWords.length)];
+  wordleGame.attempts = 6;
+  wordleGame.guesses = [];
+  wordleGame.active = true;
+  wordleStatus.textContent = "";
+  wordleInput.value = "";
+  wordleInput.focus();
+  renderWordleBoard();
+}
+
+function renderWordleBoard() {
+  wordleBoard.innerHTML = "";
+
+  for (let i = 0; i < 6; i++) {
+    const row = document.createElement("div");
+    row.className = "wordle-row";
+
+    for (let j = 0; j < 5; j++) {
+      const cell = document.createElement("div");
+      cell.className = "wordle-cell";
+      const letter = wordleGame.guesses[i] ? wordleGame.guesses[i][j] : "";
+      cell.textContent = letter;
+
+      if (wordleGame.guesses[i]) {
+        const actualLetter = wordleGame.word[j];
+        if (letter === actualLetter) {
+          cell.classList.add("correct");
+        } else if (wordleGame.word.includes(letter)) {
+          cell.classList.add("present");
+        } else {
+          cell.classList.add("absent");
+        }
+      }
+
+      row.appendChild(cell);
+    }
+    wordleBoard.appendChild(row);
+  }
+}
+
+function submitWordleGuess() {
+  if (!wordleGame.active) return;
+
+  const guess = wordleInput.value.toUpperCase();
+
+  if (guess.length !== 5) {
+    wordleStatus.textContent = "Enter a 5-letter word!";
+    return;
+  }
+
+
+  wordleGame.guesses.push(guess);
+  wordleGame.attempts--;
+  wordleInput.value = "";
+
+  renderWordleBoard();
+
+  if (guess === wordleGame.word) {
+    wordleStatus.textContent = `🎉 You won! The word was ${wordleGame.word}`;
+    wordleGame.active = false;
+    wordleSubmitBtn.textContent = "New Game";
+  } else if (wordleGame.attempts === 0) {
+    wordleStatus.textContent = `😢 Game over! The word was ${wordleGame.word}`;
+    wordleGame.active = false;
+    wordleSubmitBtn.textContent = "New Game";
+  } else {
+    wordleStatus.textContent = `Attempts left: ${wordleGame.attempts}`;
+  }
+}
+
+wordleSubmitBtn.addEventListener("click", () => {
+  if (!wordleGame.active) {
+    initWordle();
+    wordleSubmitBtn.textContent = "Submit";
+  } else {
+    submitWordleGuess();
+  }
+});
+
+wordleInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    if (!wordleGame.active) {
+      initWordle();
+      wordleSubmitBtn.textContent = "Submit";
+    } else {
+      submitWordleGuess();
+    }
+  }
+});
+
+initWordle();
+
+

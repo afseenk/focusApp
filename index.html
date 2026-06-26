@@ -23,8 +23,11 @@
 
       <button class="nav-btn active" data-page="dashboard">Dashboard</button>
       <button class="nav-btn" data-page="goals">Goals</button>
+      <button class="nav-btn" data-page="notes">Notes</button>
+      <button class="nav-btn" data-page="flashcards">Flashcards</button>
       <button class="nav-btn" data-page="timer">Timer</button>
       <button class="nav-btn" data-page="calendar">Calendar</button>
+      <button class="nav-btn" data-page="minigames">Minigames</button>
       <button class="nav-btn" data-page="progress">Progress</button>
       <button class="nav-btn" data-page="themes">Themes</button>
 
@@ -62,6 +65,7 @@
 
         <div id="dashboardGoals"></div>
 
+        <p class="copyright-text">© 2026 by afseen</p>
       </section>
 
       <!-- GOALS -->
@@ -85,6 +89,53 @@
 
         <ul id="goalList"></ul>
 
+        <p class="copyright-text">© 2026 by afseen</p>
+      </section>
+
+      <!-- NOTES -->
+
+      <section id="notes" class="page">
+
+        <p class="label">NOTES</p>
+
+        <div class="card notes-card">
+
+          <p class="small-label">Write your study notes here. They save automatically.</p>
+
+          <textarea
+            id="notesContent"
+            placeholder="Start typing your notes..."
+          ></textarea>
+
+        </div>
+
+        <p class="copyright-text">© 2026 by afseen</p>
+      </section>
+
+      <!-- FLASHCARDS -->
+
+      <section id="flashcards" class="page">
+
+        <p class="label">FLASHCARDS</p>
+
+        <div class="card">
+          <p class="small-label">Create flashcards for quick study review.</p>
+
+          <input id="flashcardFront" placeholder="Front of card">
+          <input id="flashcardBack" placeholder="Back of card">
+          <button id="addFlashcardBtn" class="action-btn">Add Flashcard</button>
+        </div>
+
+        <div class="card">
+          <div class="button-row">
+            <button id="practiceFlashcardsBtn" class="action-btn">Practice</button>
+            <button id="closePracticeBtn" class="action-btn">Close</button>
+          </div>
+          <div id="flashcardList"></div>
+          <div id="practicePanel" class="practice-panel"></div>
+        </div>
+
+        <p class="copyright-text">© 2026 by afseen</p>
       </section>
 
       <!-- TIMER -->
@@ -115,7 +166,7 @@
 
           <div class="timer-status-box">
             <p id="timerStatus">Work Time</p>
-            <span id="timerSubtext">Focus session</span>
+            <span id="timerSubtext">Focus session, you can do this!!</span>
           </div>
 
           <div id="timerDisplay">
@@ -127,11 +178,13 @@
             <button id="startBtn">Start</button>
             <button id="pauseBtn">Pause</button>
             <button id="resetBtn">Reset</button>
+            <button id="switchModeBtn">Switch Mode</button>
 
           </div>
 
         </div>
 
+        <p class="copyright-text">© 2026 by afseen</p>
       </section>
 
       <!-- CALENDAR -->
@@ -186,6 +239,14 @@
               type="date"
             >
 
+            <label for="eventRecurrenceInput">Repeat</label>
+            <select id="eventRecurrenceInput">
+              <option value="none">None</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+
             <button id="addEventBtn">
               Add to Calendar
             </button>
@@ -214,6 +275,7 @@
 
         </div>
 
+        <p class="copyright-text">© 2026 by afseen</p>
       </section>
 
       <!-- PROGRESS -->
@@ -240,6 +302,55 @@
           Reset Stats
         </button>
 
+        <p class="copyright-text">© 2026 by afseen</p>
+      </section>
+
+      <!-- MINIGAMES -->
+
+      <section id="minigames" class="page">
+
+        <p class="label">BREAK TIME MINIGAMES</p>
+
+        <div class="games-container">
+
+          <!-- TIC TAC TOE -->
+          <div class="card game-card">
+            <h3>Tic Tac Toe</h3>
+            <p class="small-label">You are X, computer is O</p>
+            <div class="tictac-controls">
+              <label for="tictacDifficulty">Difficulty:</label>
+              <select id="tictacDifficulty">
+                <option value="hard">Hard</option>
+                <option value="easy">Easy</option>
+              </select>
+            </div>
+            <div id="tictacGrid" class="tictac-grid"></div>
+            <button id="tictacResetBtn" class="game-reset-btn">New Game</button>
+            <p id="tictacStatus"></p>
+          </div>
+
+          <!-- MEMORY MATCH -->
+          <div class="card game-card">
+            <h3>Memory Match</h3>
+            <p class="small-label">Find matching pairs!</p>
+            <div id="memoryGrid" class="memory-grid"></div>
+            <button id="memoryResetBtn" class="game-reset-btn">New Game</button>
+            <p id="memoryScore"></p>
+          </div>
+
+          <!-- WORDLE -->
+          <div class="card game-card">
+            <h3>Wordle</h3>
+            <p class="small-label">Guess the word in 6 tries</p>
+            <div id="wordleBoard" class="wordle-board"></div>
+            <input id="wordleInput" type="text" placeholder="Type a word" class="wordle-input" maxlength="5">
+            <button id="wordleSubmitBtn" class="game-reset-btn">Submit</button>
+            <p id="wordleStatus"></p>
+          </div>
+
+        </div>
+
+        <p class="copyright-text">© 2026 by afseen</p>
       </section>
 
       <!-- THEMES -->
@@ -279,10 +390,16 @@
 
         </div>
 
+        <p class="copyright-text">© 2026 by afseen</p>
       </section>
 
     </main>
 
+  </div>
+
+  <div id="notificationBar" class="notification-bar">
+    <span id="notificationText"></span>
+    <button id="recoverBtn" class="recover-btn">Recover</button>
   </div>
 
   <script src="script.js"></script>
