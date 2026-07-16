@@ -1003,6 +1003,7 @@ button {
 
 /* RESPONSIVE */
 
+/* TABLETS & MEDIUM SCREENS */
 @media (max-width: 1000px) {
 
   .calendar-layout {
@@ -1011,6 +1012,7 @@ button {
 
 }
 
+/* TABLET TO MOBILE */
 @media (max-width: 900px) {
 
   .app {
@@ -1021,17 +1023,35 @@ button {
     width: 100%;
     flex-direction: row;
     overflow-x: auto;
+    overflow-y: hidden;
     align-items: center;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    gap: 8px;
+    flex-wrap: nowrap;
   }
 
   .logo {
     margin-bottom: 0;
-    margin-right: 10px;
+    margin-right: 15px;
     white-space: nowrap;
+    font-size: 1.5rem;
+  }
+
+  .nav-btn {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 
   .content {
-    padding: 20px;
+    padding: 24px 20px;
+    flex: 1;
+    overflow-y: auto;
   }
 
   #timerDisplay {
@@ -1042,49 +1062,112 @@ button {
     flex-direction: column;
   }
 
-}
-
-@media (max-width: 600px) {
-
-  .sidebar {
-    gap: 8px;
-    padding: 18px;
+  .games-container {
+    grid-template-columns: 1fr;
   }
 
-  .nav-btn {
-    padding: 12px;
-    font-size: 0.85rem;
+  .practice-card {
+    padding: 30px 20px;
+    min-height: 400px;
+  }
+
+  .practice-card h2 {
+    font-size: 1.5rem;
+  }
+
+}
+
+/* SMALL TABLETS & LARGE PHONES */
+@media (max-width: 768px) {
+
+  body {
+    font-size: 16px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .label {
+    margin-bottom: 16px;
+  }
+
+  .card {
+    padding: 20px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+  }
+
+  .button-row {
+    flex-wrap: wrap;
   }
 
   .button-group {
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .button-group button {
+    min-height: 44px;
+    padding: 14px;
+  }
+
+  #addGoalBtn,
+  #startBtn,
+  #pauseBtn,
+  #resetBtn,
+  #switchModeBtn,
+  #resetStatsBtn,
+  #modeToggleBtn,
+  #addEventBtn,
+  #addFlashcardBtn,
+  #practiceFlashcardsBtn,
+  #revealCardBtn,
+  #prevCardBtn,
+  #nextCardBtn,
+  #closePracticeBtn,
+  .action-btn {
+    min-height: 44px;
+    padding: 12px 18px;
   }
 
   .goal-item {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
+  }
+
+  .goal-left {
+    width: 100%;
   }
 
   .delete-btn {
     width: 100%;
+    min-height: 44px;
+  }
+
+  .goal-text {
+    word-break: break-word;
   }
 
   .dashboard-top {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 
   #goalProgressText {
     text-align: left;
-  }
-
-  .mode-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  #modeToggleBtn {
     width: 100%;
+  }
+
+  .calendar-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .calendar-header h2 {
+    font-size: 1.3rem;
   }
 
   .calendar-weekdays,
@@ -1094,22 +1177,678 @@ button {
 
   .calendar-day,
   .calendar-empty {
-    min-height: 62px;
+    min-height: 70px;
     border-radius: 12px;
-    padding: 7px;
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .day-number {
+    font-size: 0.9rem;
   }
 
   .event-count {
     font-size: 0.65rem;
     padding: 3px 6px;
+    margin-top: 6px;
   }
 
   .event-item {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+  }
+
+  .event-info {
+    width: 100%;
   }
 
   .event-delete-btn {
     width: 100%;
+    min-height: 44px;
   }
+
+  .mode-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  #modeToggleBtn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .stat {
+    padding: 16px;
+  }
+
+  .stat h3 {
+    font-size: 1.8rem;
+  }
+
+  .memory-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .tictac-grid {
+    gap: 6px;
+  }
+
+  .tictac-cell {
+    font-size: 1.3rem;
+  }
+
+}
+
+/* PHONES - MEDIUM SIZE */
+@media (max-width: 600px) {
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .sidebar {
+    gap: 6px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .logo {
+    font-size: 1.3rem;
+    margin-right: 10px;
+  }
+
+  .nav-btn {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    border-radius: 12px;
+    min-height: 40px;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .label {
+    font-size: 0.7rem;
+    margin-bottom: 14px;
+    letter-spacing: 1.5px;
+  }
+
+  .card {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 18px;
+  }
+
+  .welcome-card h2 {
+    font-size: 1.4rem;
+  }
+
+  .welcome-card p {
+    font-size: 0.95rem;
+  }
+
+  .small-label {
+    font-size: 0.65rem;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+
+  textarea {
+    min-height: 200px;
+  }
+
+  label {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  #addGoalBtn,
+  #startBtn,
+  #pauseBtn,
+  #resetBtn,
+  #switchModeBtn,
+  #resetStatsBtn,
+  #modeToggleBtn,
+  #addEventBtn,
+  #addFlashcardBtn,
+  #practiceFlashcardsBtn,
+  #revealCardBtn,
+  #prevCardBtn,
+  #nextCardBtn,
+  #closePracticeBtn,
+  .action-btn,
+  .history-btn {
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+  }
+
+  .button-row {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+
+  #goalProgress {
+    font-size: 1.8rem;
+  }
+
+  .goal-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .goal-left {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .delete-btn {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .goal-text {
+    font-size: 0.95rem;
+    word-break: break-word;
+  }
+
+  .dashboard-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  #goalProgressText {
+    text-align: left;
+    font-size: 0.95rem;
+  }
+
+  .progress-bar {
+    height: 12px;
+    margin-top: 12px;
+  }
+
+  .copyright-text {
+    font-size: 0.8rem;
+    margin-top: 20px;
+  }
+
+  .practice-panel {
+    padding: 16px;
+  }
+
+  .practice-card {
+    width: 100%;
+    min-height: 350px;
+    padding: 24px 16px;
+    border-radius: 20px;
+  }
+
+  .practice-card h2 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+
+  .practice-card p {
+    font-size: 1rem;
+  }
+
+  .practice-counter {
+    font-size: 0.9rem;
+  }
+
+  .practice-actions {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  #timerDisplay {
+    font-size: 2.5rem;
+    margin: 20px 0 24px;
+  }
+
+  #timerStatus {
+    font-size: 0.75rem;
+    padding: 8px 14px;
+  }
+
+  .calendar-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .calendar-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .calendar-nav-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+
+  .calendar-weekdays,
+  .calendar-grid {
+    gap: 5px;
+  }
+
+  .calendar-day,
+  .calendar-empty {
+    min-height: 60px;
+    border-radius: 10px;
+    padding: 6px;
+    font-size: 0.85rem;
+  }
+
+  .day-number {
+    font-size: 0.85rem;
+  }
+
+  .event-count {
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    margin-top: 4px;
+  }
+
+  .event-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .event-info h4 {
+    font-size: 0.95rem;
+  }
+
+  .event-info p {
+    font-size: 0.85rem;
+  }
+
+  .event-delete-btn {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  .mode-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 10px;
+  }
+
+  #modeText {
+    font-size: 0.95rem;
+  }
+
+  #modeToggleBtn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .theme-options {
+    gap: 10px;
+  }
+
+  .theme-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stats-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stat {
+    padding: 14px;
+  }
+
+  .stat h3 {
+    font-size: 1.6rem;
+  }
+
+  .stat p {
+    font-size: 0.9rem;
+  }
+
+  .games-container {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .game-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .tictac-grid {
+    gap: 5px;
+    margin: 10px 0;
+  }
+
+  .tictac-cell {
+    font-size: 1.2rem;
+  }
+
+  .tictac-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tictac-controls label {
+    font-size: 0.9rem;
+  }
+
+  .tictac-controls select {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .memory-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin: 10px 0;
+  }
+
+  .memory-card {
+    font-size: 1.1rem;
+  }
+
+  .wordle-row {
+    gap: 3px;
+  }
+
+  .wordle-cell {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+
+  .wordle-input {
+    font-size: 0.9rem;
+  }
+
+  #wordleStatus {
+    font-size: 0.9rem;
+  }
+
+}
+
+/* SMALL PHONES */
+@media (max-width: 480px) {
+
+  body {
+    font-size: 15px;
+  }
+
+  .sidebar {
+    padding: 10px 12px;
+    gap: 4px;
+  }
+
+  .logo {
+    font-size: 1.2rem;
+    margin-right: 8px;
+  }
+
+  .nav-btn {
+    padding: 9px 12px;
+    font-size: 0.75rem;
+    border-radius: 10px;
+    min-height: 40px;
+  }
+
+  .content {
+    padding: 10px;
+  }
+
+  .label {
+    font-size: 0.65rem;
+    margin-bottom: 12px;
+  }
+
+  .card {
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+  }
+
+  .welcome-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .welcome-card p {
+    font-size: 0.9rem;
+  }
+
+  .small-label {
+    font-size: 0.6rem;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 11px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+
+  textarea {
+    min-height: 160px;
+  }
+
+  label {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+
+  #addGoalBtn,
+  #startBtn,
+  #pauseBtn,
+  #resetBtn,
+  #switchModeBtn,
+  #resetStatsBtn,
+  #modeToggleBtn,
+  #addEventBtn,
+  #addFlashcardBtn,
+  #practiceFlashcardsBtn,
+  #revealCardBtn,
+  #prevCardBtn,
+  #nextCardBtn,
+  #closePracticeBtn,
+  .action-btn,
+  .history-btn {
+    min-height: 40px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .delete-btn {
+    min-height: 40px;
+    padding: 9px 10px;
+    font-size: 0.9rem;
+  }
+
+  #goalProgress {
+    font-size: 1.6rem;
+  }
+
+  .goal-item {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .goal-text {
+    font-size: 0.9rem;
+  }
+
+  .practice-card {
+    min-height: 320px;
+    padding: 20px 14px;
+  }
+
+  .practice-card h2 {
+    font-size: 1.2rem;
+  }
+
+  .practice-card p {
+    font-size: 0.95rem;
+  }
+
+  #timerDisplay {
+    font-size: 2rem;
+    margin: 16px 0 20px;
+  }
+
+  .calendar-day,
+  .calendar-empty {
+    min-height: 55px;
+    border-radius: 8px;
+    padding: 5px;
+    font-size: 0.8rem;
+  }
+
+  .day-number {
+    font-size: 0.8rem;
+  }
+
+  .event-item {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .event-delete-btn {
+    min-height: 38px;
+    padding: 7px 8px;
+    font-size: 0.85rem;
+  }
+
+  .theme-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .stat h3 {
+    font-size: 1.4rem;
+  }
+
+  .tictac-grid {
+    gap: 4px;
+  }
+
+  .tictac-cell {
+    font-size: 1rem;
+  }
+
+  .memory-grid {
+    gap: 4px;
+  }
+
+  .memory-card {
+    font-size: 1rem;
+  }
+
+  .wordle-cell {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .copyright-text {
+    font-size: 0.75rem;
+  }
+
+}
+
+/* EXTRA SMALL PHONES */
+@media (max-width: 360px) {
+
+  .sidebar {
+    padding: 8px 10px;
+  }
+
+  .logo {
+    font-size: 1.1rem;
+  }
+
+  .nav-btn {
+    padding: 8px 10px;
+    font-size: 0.7rem;
+    min-height: 36px;
+  }
+
+  .content {
+    padding: 8px;
+  }
+
+  .card {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  textarea {
+    min-height: 140px;
+  }
+
+  #goalProgress {
+    font-size: 1.4rem;
+  }
+
+  #timerDisplay {
+    font-size: 1.8rem;
+  }
+
+  .calendar-day,
+  .calendar-empty {
+    min-height: 50px;
+  }
+
+  .tictac-grid {
+    gap: 3px;
+  }
+
+  .memory-grid {
+    gap: 3px;
+  }
+
 }
